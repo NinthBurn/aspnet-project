@@ -1,0 +1,102 @@
+﻿@model List<Lab10.Models.Entities.UserLog>
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+	int? a = HttpContextAccessor.HttpContext.Session.GetInt32("UserId");
+	int sessionvalue = a == null ? 0 : (int)a;
+
+	Pager pager = new Pager();
+	int pageNo = 0;
+
+	if (ViewBag.Pager != null)
+	{
+		pager = ViewBag.Pager;
+		pageNo = pager.CurrentPage;
+	}
+}
+
+<h2 class="text-center mb-5">List of Logs</h2>
+
+<div class="row mb-5">
+	<div class="col d-inline-flex justify-content-around">
+		<a class="btn btn-primary" asp-controller="UserLogs" asp-action="Add">New Log</a>
+		<a class="btn btn-primary" asp-controller="UserLogs" asp-action="Index" asp-route-page="1" asp-route-showFromUser="true" asp-route-filterType="@ViewBag.filterType" asp-route-filterSeverity="@ViewBag.filterSeverity">My logs</a>
+		<a class="btn btn-primary" asp-controller="UserLogs" asp-action="Index" asp-route-page="1" asp-route-showFromUser="false" asp-route-filterType="@ViewBag.filterType" asp-route-filterSeverity="@ViewBag.filterSeverity">All logs</a>
+		<div class="col-sm-1">
+			<select class="form-select" id="LogType" asp-items="ViewBag.LogTypes" onchange="ChangeTypeFilter(this)" va></select>
+		</div>
+		<div class="col-sm-1">
+			<select class="form-select" id="LogSeverity" asp-items="ViewBag.LogSeverities" onchange="ChangeTypeSeverity(this)"></select>
+		</div>
+	</div>
+</div>
+<p>@a</p>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Username</th>
+			<th>Log Type</th>
+			<th>Log Severity</th>
+			<th>Log Date</th>
+			<th>Log Content</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (Lab10.Models.Entities.UserLog log in Model)
+		{
+			<tr>
+				<td>@log.User.Name</td>
+				<td>@log.LogType</td>
+				<td>@log.LogSeverity</td>
+				<td>@log.LogDate</td>
+				<td>@log.LogContent</td>
+				@if (log.UserId == sessionvalue)
+				{
+					<td>
+						<a class="btn btn-primary" asp-controller="UserLogs" asp-action="Edit" asp-route-id="@log.Id">Edit</a>
+					</td>
+				}else{
+					<td>
+						Not owner
+					</td>
+				}
+
+			</tr>
+		}
+	</tbody>
+</table>
+
+<div class="container">
+	@if (pager.TotalPages > 0)
+	{
+		<ul class="pagination justify-content-center">
+			@for (var pge = pager.StartPage; pge <= pager.EndPage; pge++)
+			{
+				<li class="page-item @(pge == pager.CurrentPage ? "active" : "")">
+					<a class="page-link" asp-controller="UserLogs" asp-action="Index" asp-route-page="@pge" asp-route-showFromUser="@ViewBag.filterByUser" asp-route-filterType="@ViewBag.filterType" asp-route-filterSeverity="@ViewBag.filterSeverity"> @pge </a>
+				</li>
+			}
+		</ul>
+	}
+</div>
+
+<script>
+	document.getElementById("LogType").value = '@ViewBag.filterType';
+	document.getElementById("LogSeverity").value = '@ViewBag.filterSeverity';
+	//$("#LogType").val('@ViewBag.filterType').change();
+	//$("#LogSeverity").val('@ViewBag.filterSeverity').change();
+
+	function ChangeTypeFilter(obj) {
+		var controllerName = '@this.ViewContext.RouteData.Values["controller"].ToString()';
+
+		window.location.href = "/" + controllerName + "?page=1&showFromUser=" + '@ViewBag.filterByUser' + "&filterType=" + obj.value + "&filterSeverity=" + '@ViewBag.filterSeverity';
+	}
+
+	function ChangeTypeSeverity(obj) {
+		var controllerName = '@this.ViewContext.RouteData.Values["controller"].ToString()';
+
+		window.location.href = "/" + controllerName + "?page=1&showFromUser=" + '@ViewBag.filterByUser' + "&filterType=" + '@ViewBag.filterType' + "&filterSeverity=" + obj.value;
+	}
+</script>

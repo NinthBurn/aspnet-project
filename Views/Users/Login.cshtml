@@ -1,0 +1,20 @@
+﻿@{
+}
+@model Lab10.Models.UserLoginViewModel
+
+<h1>Login</h1>
+<form method="post">
+	<div class="mt-3">
+		<label class="form-label">Email</label>
+		<input type="email" class="form-control" asp-for="Email" required/>
+	</div>
+
+	<div class="mt-3">
+		<label class="form-label">Password</label>
+		<input type="password" class="form-control" asp-for="Password" required/>
+	</div>
+
+	<div class="mt-3">
+		<button type="submit" class="btn btn-primary ms-3" asp-action="Login" asp-controller="Users">Login</button>
+	</div>
+</form>
